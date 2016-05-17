@@ -1,0 +1,20 @@
+{
+    "name": "landscape/landscape.php.template",
+    "type": "library",
+    "description": "HTML templating module for LandscapePHP",
+    "keywords": ["macro","HTML", "templating", "module", "Landscape"],
+    "homepage": "https://github.com/LandscapeFramework/LandscapeModuleTemplate",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marius Messerschmidt",
+            "email": "marius.messerschmidt@googlemail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
