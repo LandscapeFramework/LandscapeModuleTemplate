@@ -13,12 +13,11 @@
 
         public static function timeFunc($key, $args)
         {
-            return "12:32:12 - 12.12.1992";
-        }
-
-        public function hey()
-        {
-            print "hey";
+            if(!isset($args[0]))
+            {
+                $args[0] = "%c";
+            }
+            return strftime($args[0]);
         }
 
     }
@@ -27,8 +26,8 @@
     {
         private $TemplateFunctions = [
 
-            ["time", TemplateFunctionType::SINGLE, __NAMESPACE__."\TemplateEngineDefaultFunctions::timeFunc"],
-            ["if", TemplateFunctionType::WRAPER, NULL],
+            ["time", TemplateFunctionType::SINGLE, "default" ,"timeFunc"],
+            ["if", TemplateFunctionType::WRAPER, "default" ,NULL],
 
         ];
 
@@ -66,21 +65,40 @@
             $f = file($this->file);
 
 
-            foreach($f as $line)
+            for($x = 0; $x < sizeof($f); $x++)
             {
-                $pos = strpos($line, "{%");
+                $pos = strpos($f[$x], "{%");
                 if($pos !== false)
                 {
-                    $pos2 = strpos($line, "%}", $pos);
-                    $fc = substr($line, $pos+2, $pos2-$pos-2);
+                    $pos2 = strpos($f[$x], "%}", $pos);
+                    $fc = substr($f[$x], $pos+2, $pos2-$pos-2);
                     $temp = $fc;
                     $func = strtok($temp, ":");
                     $len = strlen($func)+1;
                     $func = trim($func);
-                    $args = substr($fc, $len);
+                    $argsstr = substr($fc, $len);
+                    $args = array_values(preg_grep('/^\s*\z/', explode('\'', $argsstr), PREG_GREP_INVERT));
+
+                    // Match Function
+                    foreach($this->TemplateFunctions as $tfunc)
+                    {
+                        if($tfunc[0] == $func)
+                        {
+                            if($tfunc[2] == "default")
+                            {
+                                $res = TemplateEngineDefaultFunctions::$tfunc[3]($fc, $args);
+                                $f[$x] = str_replace(substr($f[$x], $pos, $pos2-$pos+2), $res, $f[$x]);
+                            }
+
+                        }
+                    }
+
+
 
                 }
             }
+
+            return implode('', $f);
         }
     }
 ?>
