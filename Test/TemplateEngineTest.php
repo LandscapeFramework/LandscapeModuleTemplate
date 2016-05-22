@@ -34,12 +34,13 @@
             $this->assertTrue($cont['x'] == "y2");
         }
 
-        public function renderTest()
+        public function testRender()
         {
-            $temp = new TemplateEngine("Test/test.html", array());
+            $temp = new TemplateEngine("Test/test.html", array("valid" => true));
+            $expected = implode('', file("Test/expected.html"));
 
             $x = $temp->renderStart();
-            $this->assertTrue($x != "");
+            $this->assertTrue($x == $expected);
         }
     }
 
