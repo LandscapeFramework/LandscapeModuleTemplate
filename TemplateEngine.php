@@ -6,10 +6,10 @@
         const WRAPER = "W";
     }
 
-    function ifFunc($key, $args, $space)
+    function ifFunc($context, $key, $args, $space)
     {}
 
-    function timeFunc($key, $args)
+    function TemplateDefaultTimeFunc($context, $key, $args)
     {
         if(!isset($args[0]))
         {
@@ -17,13 +17,19 @@
         }
         return strftime($args[0]);
     }
+    
+    function TemplateDefaultIncludeFunc($context, $key, $args)
+    {
+        return implode('', file($args[0]));
+    }
 
     class TemplateEngine
     {
         private $TemplateFunctions = [
 
             ["if", TemplateFunctionType::WRAPER, "default" ,NULL],
-
+            ["time",TemplateFunctionType::SINGLE, "default", "\\TemplateDefaultTimeFunc", false],
+            ["include", TemplateFunctionType::SINGLE, "default", "\\TemplateDefaultIncludeFunc", true],
         ];
 
         private $file;
@@ -33,7 +39,6 @@
         {
             $this->file = $file;
             $this->context = $context;
-            $this->TemplateFunctions[] = array("time", TemplateFunctionType::SINGLE, "default", '\\timeFunc');
         }
 
         public function setContext(array $context)
@@ -90,11 +95,14 @@
                             {
                                 if($tfunc[1] == TemplateFunctionType::SINGLE)
                                 {
-                                    $res = call_user_func(__NAMESPACE__.$tfunc[3], $fc, $args);
+                                    $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args);
                                 }
                                 $f[$x] = str_replace(substr($f[$x], $pos, $pos2-$pos+2), $res, $f[$x]);
                             }
-
+                            if($tfunc[4] == true)
+                            {
+                                return false;
+                            }
                         }
                     }
 
