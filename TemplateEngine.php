@@ -1,4 +1,4 @@
-<?php namespace Landscape\Template;
+<?php namespace Landscape;
 
     class TemplateFunctionType
     {
@@ -6,8 +6,11 @@
         const WRAPER = "W";
     }
 
-    function ifFunc($context, $key, $args, $space)
-    {}
+    function TemplateDefaultIfFunc($context, $key, $args, $space)
+    {
+        if($context[$args[0]])
+            return $space;
+    }
 
     function TemplateDefaultTimeFunc($context, $key, $args)
     {
@@ -17,7 +20,7 @@
         }
         return strftime($args[0]);
     }
-    
+
     function TemplateDefaultIncludeFunc($context, $key, $args)
     {
         return implode('', file($args[0]));
@@ -26,8 +29,7 @@
     class TemplateEngine
     {
         private $TemplateFunctions = [
-
-            ["if", TemplateFunctionType::WRAPER, "default" ,NULL],
+            ["if", TemplateFunctionType::WRAPER, "default" ,"\\TemplateDefaultIfFunc", true],
             ["time",TemplateFunctionType::SINGLE, "default", "\\TemplateDefaultTimeFunc", false],
             ["include", TemplateFunctionType::SINGLE, "default", "\\TemplateDefaultIncludeFunc", true],
         ];
@@ -60,7 +62,7 @@
         {
             return $this->file;
         }
-        
+
         public function renderStart()
         {
             $f = file($this->file);
@@ -70,8 +72,6 @@
 
         public function render(&$f)
         {
-
-
             for($x = 0; $x < sizeof($f); $x++)
             {
                 $pos = strpos($f[$x], "{%");
@@ -91,13 +91,31 @@
                     {
                         if($tfunc[0] == $func)
                         {
+                            $offset = 0;
                             if($tfunc[2] == "default")
                             {
+                                $res="";
                                 if($tfunc[1] == TemplateFunctionType::SINGLE)
                                 {
                                     $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args);
+                                    $f[$x] = str_replace(substr($f[$x-$offset], $pos, $pos2-$pos+2), $res, $f[$x-$offset]);
                                 }
-                                $f[$x] = str_replace(substr($f[$x], $pos, $pos2-$pos+2), $res, $f[$x]);
+                                elseif($tfunc[1] == TemplateFunctionType::WRAPER)
+                                {
+                                    $endtag = "{% end:".$func." %}";
+                                    $inline = "";
+                                    while(strpos($f[$x], $endtag) === false && $f[$x] != NULL)
+                                    {
+                                        if($offset != 0)
+                                            $inline = $inline.$f[$x];
+                                        $f[$x] = "";
+                                        $x++;
+                                        $offset++;
+                                    }
+                                    $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args, $inline);
+                                    $f[$x] = $res;
+                                }
+
                             }
                             if($tfunc[4] == true)
                             {

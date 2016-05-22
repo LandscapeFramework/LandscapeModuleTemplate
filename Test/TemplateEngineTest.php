@@ -3,7 +3,7 @@
     namespace Test;
 
     require_once('TemplateEngine.php');
-    use Landscape\Template\TemplateEngine;
+    use Landscape\TemplateEngine;
 
     class TemplateEngineTest extends \PHPUnit_Framework_TestCase
     {
