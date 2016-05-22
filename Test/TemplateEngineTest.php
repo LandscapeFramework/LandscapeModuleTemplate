@@ -38,7 +38,7 @@
         {
             $temp = new TemplateEngine("Test/test.html", array());
 
-            $x = $temp->render();
+            $x = $temp->renderStart();
             $this->assertTrue($x != "");
         }
     }

@@ -6,27 +6,22 @@
         const WRAPER = "W";
     }
 
-    class TemplateEngineDefaultFunctions
+    function ifFunc($key, $args, $space)
+    {}
+
+    function timeFunc($key, $args)
     {
-        public static function ifFunc($key, $args, $space)
-        {}
-
-        public static function timeFunc($key, $args)
+        if(!isset($args[0]))
         {
-            if(!isset($args[0]))
-            {
-                $args[0] = "%c";
-            }
-            return strftime($args[0]);
+            $args[0] = "%c";
         }
-
+        return strftime($args[0]);
     }
 
     class TemplateEngine
     {
         private $TemplateFunctions = [
 
-            ["time", TemplateFunctionType::SINGLE, "default" ,"timeFunc"],
             ["if", TemplateFunctionType::WRAPER, "default" ,NULL],
 
         ];
@@ -38,6 +33,7 @@
         {
             $this->file = $file;
             $this->context = $context;
+            $this->TemplateFunctions[] = array("time", TemplateFunctionType::SINGLE, "default", '\\timeFunc');
         }
 
         public function setContext(array $context)
@@ -59,10 +55,16 @@
         {
             return $this->file;
         }
-
-        public function render()
+        
+        public function renderStart()
         {
             $f = file($this->file);
+            while($this->render($f) == false);
+            return implode('', $f);
+        }
+
+        public function render(&$f)
+        {
 
 
             for($x = 0; $x < sizeof($f); $x++)
@@ -86,7 +88,10 @@
                         {
                             if($tfunc[2] == "default")
                             {
-                                $res = TemplateEngineDefaultFunctions::$tfunc[3]($fc, $args);
+                                if($tfunc[1] == TemplateFunctionType::SINGLE)
+                                {
+                                    $res = call_user_func(__NAMESPACE__.$tfunc[3], $fc, $args);
+                                }
                                 $f[$x] = str_replace(substr($f[$x], $pos, $pos2-$pos+2), $res, $f[$x]);
                             }
 
@@ -98,7 +103,7 @@
                 }
             }
 
-            return implode('', $f);
+            return true;
         }
     }
 ?>
