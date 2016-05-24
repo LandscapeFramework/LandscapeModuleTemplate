@@ -75,6 +75,17 @@
             for($x = 0; $x < sizeof($f); $x++)
             {
                 $pos = strpos($f[$x], "{%");
+                $posV= strpos($f[$x], "{{");
+
+                if($posV !== false)
+                {
+                    $posV2 = strpos($f[$x], "}}", $posV);
+                    $fc = substr($f[$x], $posV+2, $posV2-$posV-2);
+                    $fc = trim($fc);
+                    $f[$x] = str_replace(substr($f[$x], $posV, $posV2-$posV+2), $this->context[$fc], $f[$x]);
+                }
+
+
                 if($pos !== false)
                 {
                     $pos2 = strpos($f[$x], "%}", $pos);
