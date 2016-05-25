@@ -85,7 +85,6 @@
                     $f[$x] = str_replace(substr($f[$x], $posV, $posV2-$posV+2), $this->context[$fc], $f[$x]);
                 }
 
-
                 if($pos !== false)
                 {
                     $pos2 = strpos($f[$x], "%}", $pos);
