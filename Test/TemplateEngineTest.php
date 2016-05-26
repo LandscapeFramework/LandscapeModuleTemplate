@@ -36,7 +36,7 @@
 
         public function testRender()
         {
-            $temp = new TemplateEngine("Test/test.html", array("valid" => true, 'var' => 'Hello World'));
+            $temp = new TemplateEngine("Test/test.html", array("valid" => true, 'var' => 'Hello World', 'var2' => '!!'));
             $expected = implode('', file("Test/expected.html"));
 
             $x = $temp->renderStart();
