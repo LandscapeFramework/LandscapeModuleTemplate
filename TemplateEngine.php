@@ -82,7 +82,16 @@
                     $posV2 = strpos($f[$x], "}}", $posV);
                     $fc = substr($f[$x], $posV+2, $posV2-$posV-2);
                     $fc = trim($fc);
-                    $f[$x] = str_replace(substr($f[$x], $posV, $posV2-$posV+2), $this->context[$fc], $f[$x]);
+                    $posObj = strpos($fc, "->");
+                    if($posObj === false)
+                        $rep = $this->context[$fc];
+                    else
+                    {
+                        $tmp = strtok($fc, "->");
+                        $tmp2= substr($fc, $posObj+2);
+                        $rep = $this->context[$tmp]->$tmp2;
+                    }
+                    $f[$x] = str_replace(substr($f[$x], $posV, $posV2-$posV+2), $rep, $f[$x]);
                 }
 
                 if($pos !== false)

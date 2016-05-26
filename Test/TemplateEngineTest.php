@@ -4,12 +4,18 @@
 
     require_once('TemplateEngine.php');
     use Landscape\TemplateEngine;
+    
+    class Dataset
+    {
+        public $value = "Variable in a nested class";
+    }
 
     class TemplateEngineTest extends \PHPUnit_Framework_TestCase
     {
         public function testGetSet()
         {
-            $temp = new TemplateEngine("file2", array("a" => "b2", "x" => "y2"));
+            $obj = new Dataset();
+            $temp = new TemplateEngine("file2", array("a" => "b2", "x" => "y2", "obj" => $obj));
 
             $temp->setFile("file");
             $temp->setContext(array("a" => "b", "x" => "y"));
@@ -36,7 +42,8 @@
 
         public function testRender()
         {
-            $temp = new TemplateEngine("Test/test.html", array("valid" => true, 'var' => 'Hello World', 'var2' => '!!'));
+            $obj = new Dataset();
+            $temp = new TemplateEngine("Test/test.html", array("valid" => true, 'var' => 'Hello World', 'var2' => '!!', 'obj' => $obj));
             $expected = implode('', file("Test/expected.html"));
 
             $x = $temp->renderStart();
