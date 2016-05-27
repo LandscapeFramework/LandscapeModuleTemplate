@@ -4,10 +4,15 @@
 
     require_once('TemplateEngine.php');
     use Landscape\TemplateEngine;
-    
+
     class Dataset
     {
         public $value = "Variable in a nested class";
+
+        public function method()
+        {
+            return "METHOD STRING";
+        }
     }
 
     class TemplateEngineTest extends \PHPUnit_Framework_TestCase

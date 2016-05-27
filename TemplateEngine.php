@@ -89,7 +89,10 @@
                     {
                         $tmp = strtok($fc, "->");
                         $tmp2= substr($fc, $posObj+2);
-                        $rep = $this->context[$tmp]->$tmp2;
+                        if(!is_callable(array($this->context[$tmp],$tmp2)))
+                            $rep = $this->context[$tmp]->$tmp2;
+                        else
+                            $rep = $this->context[$tmp]->$tmp2();
                     }
                     $f[$x] = str_replace(substr($f[$x], $posV, $posV2-$posV+2), $rep, $f[$x]);
                 }
