@@ -6,7 +6,18 @@ The current time is 20:15.
     This is valid
 {% end:if %}
 {{ obj->method }}
+<table>
+    <thead>
+        {% for: 'x' 'in' 'array' %}
+            <td>Dataset {{ x }}</td>
+        {% end:for %}
+    </thead>
 {% for: 'x' 'in' 'array' %}
-    Value: {{ x }} {{ x }}
+    <tr>
+        {% for: 'y' 'in' 'array' %}
+            <td>{{ y }}</td>
+        {% end:for %}
+    </tr>
 {% end:for %}
+</table>
 </html>

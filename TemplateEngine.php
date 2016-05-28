@@ -25,12 +25,11 @@
         {
             $context[$key] = $value;
             $pa = new TemplateEngine("", $context);
-            $pa->f = explode('\n',$space);
+            $pa->f = $space;
             $temp = $pa->renderStart();
             $ret = $ret.$temp;
         }
-
-        return $ret;
+        return explode('\n', $ret);
     }
 
     function TemplateDefaultTimeFunc($context, $key, $args, $parser)
@@ -165,17 +164,32 @@
                                 elseif($tfunc[1] == TemplateFunctionType::WRAPER)
                                 {
                                     $endtag = "{% end:".$func." %}";
-                                    $inline = "";
-                                    while(strpos($f[$x], $endtag) === false && $f[$x] != NULL)
+                                    $inline = [];
+                                    $depth = 0;
+                                    while($depth >= 0 && $f[$x] != NULL)
                                     {
-                                        if($offset != 0)
-                                            $inline = $inline.$f[$x];
+
+                                        if(strpos($f[$x], "{% $func") !== false && $offset != 0)
+                                        {
+                                            $depth++;
+                                        }
+
+                                        if(strpos($f[$x], $endtag) !== false)
+                                        {
+                                            $depth--;
+                                        }
+
+                                        if($offset != 0 && $depth >= 0)
+                                            $inline[] = $f[$x];
+
                                         $f[$x] = "";
                                         $x++;
                                         $offset++;
                                     }
                                     $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args, $this, $inline);
-                                    $f[$x] = $res;
+                                    $t = array_slice($f, 0, $x-1);
+                                    $t2= array_slice($f, $x-1);
+                                    $f = array_merge($t, $res, $t2);
                                 }
 
                             }
