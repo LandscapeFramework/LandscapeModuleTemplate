@@ -6,13 +6,34 @@
         const WRAPER = "W";
     }
 
-    function TemplateDefaultIfFunc($context, $key, $args, $space)
+    function TemplateDefaultIfFunc($context, $key, $args, $parser ,$space)
     {
         if($context[$args[0]])
             return $space;
     }
 
-    function TemplateDefaultTimeFunc($context, $key, $args)
+    function TemplateDEfaultForFunc($context, $key,$args, $parser, $space)
+    {
+        $key = $args[0];
+        $arr = $args[2];
+        $ret = "";
+
+        $context = $parser->getContext();
+        $arr = $context[$arr];
+
+        foreach($arr as $value)
+        {
+            $context[$key] = $value;
+            $pa = new TemplateEngine("", $context);
+            $pa->f = explode('\n',$space);
+            $temp = $pa->renderStart();
+            $ret = $ret.$temp;
+        }
+
+        return $ret;
+    }
+
+    function TemplateDefaultTimeFunc($context, $key, $args, $parser)
     {
         if(!isset($args[0]))
         {
@@ -21,7 +42,7 @@
         return strftime($args[0]);
     }
 
-    function TemplateDefaultIncludeFunc($context, $key, $args)
+    function TemplateDefaultIncludeFunc($context, $key, $args, $parser)
     {
         return implode('', file($args[0]));
     }
@@ -30,12 +51,15 @@
     {
         private $TemplateFunctions = [
             ["if", TemplateFunctionType::WRAPER, "default" ,"\\TemplateDefaultIfFunc", true],
+            ["for", TemplateFunctionType::WRAPER, "default" ,"\\TemplateDefaultForFunc", true],
             ["time",TemplateFunctionType::SINGLE, "default", "\\TemplateDefaultTimeFunc", false],
             ["include", TemplateFunctionType::SINGLE, "default", "\\TemplateDefaultIncludeFunc", true],
         ];
 
         private $file;
         private $context;
+
+        public $f;
 
         public function __construct($file, array $context)
         {
@@ -65,9 +89,25 @@
 
         public function renderStart()
         {
-            $f = file($this->file);
-            while($this->render($f) == false);
-            return implode('', $f);
+            if($this->file != "")
+                $this->f = file($this->file);
+            while($this->render($this->f) == false);
+            if($this->containsRenderable())
+                return $this->renderStart();
+            else
+                return implode('', $this->f);
+        }
+
+        private function containsRenderable()
+        {
+            foreach ($this->f as $value)
+            {
+                if(strpos($value, "{%") !== false)
+                    return true;
+                else if(strpos($value, "{{") !== false)
+                    return true;
+            }
+            return false;
         }
 
         public function render(&$f)
@@ -119,7 +159,7 @@
                                 $res="";
                                 if($tfunc[1] == TemplateFunctionType::SINGLE)
                                 {
-                                    $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args);
+                                    $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args, $this);
                                     $f[$x] = str_replace(substr($f[$x-$offset], $pos, $pos2-$pos+2), $res, $f[$x-$offset]);
                                 }
                                 elseif($tfunc[1] == TemplateFunctionType::WRAPER)
@@ -134,7 +174,7 @@
                                         $x++;
                                         $offset++;
                                     }
-                                    $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args, $inline);
+                                    $res = call_user_func(__NAMESPACE__.$tfunc[3],$this->context ,$fc, $args, $this, $inline);
                                     $f[$x] = $res;
                                 }
 

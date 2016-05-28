@@ -48,7 +48,7 @@
         public function testRender()
         {
             $obj = new Dataset();
-            $temp = new TemplateEngine("Test/test.html", array("valid" => true, 'var' => 'Hello World', 'var2' => '!!', 'obj' => $obj));
+            $temp = new TemplateEngine("Test/test.html", array("valid" => true, 'var' => 'Hello World', 'var2' => '!!', 'obj' => $obj, 'array' => [1,2,3,4, 5, 6, 7, "Hello"]));
             $expected = implode('', file("Test/expected.html"));
 
             $x = $temp->renderStart();
